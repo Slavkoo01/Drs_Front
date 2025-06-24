@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
+
 
 
 export default function Register() {
-  const navigate = useHistory();
   const [formData, setFormData] = useState({
     ime: "",
     prezime: "",
@@ -19,6 +18,21 @@ export default function Register() {
 
   const [registerError, setRegisterError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  const handleUndo = () => {
+  setFormData({
+    ime: "",
+    prezime: "",
+    ulica: "",
+    grad: "",
+    drzava: "",
+    email: "",
+    broj_telefona: "",
+    korisnicko_ime: "",
+    lozinka: "",
+  });
+};
+
 
   const handleChange = (e) => {
     setFormData({
@@ -39,7 +53,7 @@ export default function Register() {
       );
       setSuccessMessage("Successfully registered! Check your email.");
       console.log(response.data);
-      navigate.push("/");
+      
     } catch (error) {
       if (error.response && error.response.data.error) {
         setRegisterError(error.response.data.error);
@@ -100,12 +114,15 @@ export default function Register() {
                     </div>
                   )}
 
-                  <div className="text-center mt-6">
+                  <div className="text-center mt-6 flex">
                     <button
                       type="submit"
-                      className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none w-full ease-linear transition-all duration-150"
+                      className="bg-blueGray-800 text-white mr-4 active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none w-full ease-linear transition-all duration-150"
                     >
                       Create Account
+                    </button>
+                    <button onClick={handleUndo} type="button">
+                      <i className="fas fa-undo bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none w-full ease-linear transition-all duration-150"></i>
                     </button>
                   </div>
                 </form>

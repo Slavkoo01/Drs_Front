@@ -2,49 +2,42 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 
-
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "assets/styles/tailwind.css";
 
-// layouts
 import Admin from "layouts/Admin.js";
 import Auth from "layouts/Auth.js";
-
-// views without layouts
 import Index from "views/Index.js";
 import UserFeed from "views/user/Feed.js";
-import AdminHome from "views/admin/Dashboard.js"; // <- Create this if not already
+import ProtectedRoute from "./ProtectedRoute.js"; 
 
 ReactDOM.render(
   <BrowserRouter>
     <Switch>
-      {/* Routes with layouts */}
-      <Route path="/admin" component={Admin} />
+      {/* Authenticated admin routes */}
+      <ProtectedRoute
+        path="/admin"
+        component={Admin}
+        allowedRoles={["admin"]}
+      />
+
+      {/* Public auth routes */}
       <Route path="/auth" component={Auth} />
 
-      {/* Home route with role-based rendering */}
+      {/* Home route logic */}
       <Route
         path="/"
         exact
         render={() => {
           const user = JSON.parse(localStorage.getItem("DRS_user"));
-          
-          if (!user) {
-            console.log("Guest");
-            return <Index />; // public homepage
-            
-          }
 
-          if (user.role === "admin") {
-            console.log("Admin");
-            return <AdminHome />;
-          }
-          console.log("User");
+          if (!user) return <Index />;
+          if (user.role === "admin") return <Redirect to="/admin/dashboard" />;
           return <UserFeed />;
         }}
       />
 
-      {/* Fallback redirect */}
+      {/* Fallback */}
       <Redirect from="*" to="/" />
     </Switch>
   </BrowserRouter>,

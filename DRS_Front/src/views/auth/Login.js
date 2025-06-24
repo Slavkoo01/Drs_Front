@@ -36,12 +36,13 @@ export default function Login() {
       // Redirect to feed (or admin panel if role is admin)
       navigate.push("/");
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setLoginError("Invalid username or password.");
-      } else {
-        setLoginError("An error occurred. Please try again later.");
-      }
-      console.error("Login error:", error);
+    if (error.response && error.response.data?.error) {
+      // Show specific message from backend (like blocked, pending, etc.)
+      setLoginError(error.response.data.error);
+    } else {
+      setLoginError("An error occurred. Please try again later.");
+    }
+    console.error("Login error:", error);
     }
   };
 
