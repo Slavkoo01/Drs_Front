@@ -113,91 +113,92 @@ export default function CreatePostForm({ onPostCreated, onCancel }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h3 className="text-xl font-bold text-blueGray-700 mb-4">Create New Post</h3>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-      
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          {success}
-        </div>
-      )}
+  <div className="bg-white rounded-lg shadow-lg p-6">
+    <h3 className="text-xl font-bold text-blue-900 mb-4">Tell us..</h3>
+    
+    {error && (
+      <div className="bg-red-600 border border-red-800 text-white px-4 py-3 rounded mb-4 font-semibold">
+        {error}
+      </div>
+    )}
+    
+    {success && (
+      <div className="bg-green-600 border border-green-800 text-white px-4 py-3 rounded mb-4 font-semibold">
+        {success}
+      </div>
+    )}
 
-      <form onSubmit={handleSubmit}>
-        {/* Text Input */}
-        <div className="mb-4">
-          <label className="block text-blueGray-600 text-sm font-bold mb-2">
-            What's on your mind?
-          </label>
-          <textarea
-            value={formData.text}
-            onChange={handleTextChange}
-            placeholder="Share your thoughts..."
-            className="w-full px-3 py-2 text-blueGray-600 bg-white border border-blueGray-300 rounded text-sm shadow focus:outline-none focus:border-blue-500 resize-none"
-            rows="4"
-            maxLength="500"
-          />
-          <div className="text-right text-xs text-blueGray-400 mt-1">
-            {formData.text.length}/500 characters
+    <form onSubmit={handleSubmit}>
+      {/* Text Input */}
+      <div className="mb-4">
+        <label className="block text-blue-900 text-m font-bold mb-2">
+          What's on your mind?
+        </label>
+        <textarea
+          value={formData.text}
+          onChange={handleTextChange}
+          placeholder="Share your thoughts..."
+          className="w-full px-3 py-2 text-blue-900 bg-white border border-blue-700 rounded text-sm shadow focus:outline-none focus:border-blue-900 resize-none"
+          rows="4"
+          maxLength="500"
+        />
+        <div className="text-right text-xs text-blue-700 mt-1">
+          {formData.text.length}/500 characters
+        </div>
+      </div>
+
+      {/* Image Upload */}
+      <div className="mb-4">
+        <label className="block text-blue-900 text-l font-bold mb-2">
+          Add Image (Optional)
+        </label>
+        <input
+          id="image-input"
+          type="file"
+          accept="image/png,image/jpg,image/jpeg"
+          onChange={handleImageChange}
+          className="w-full px-3 py-2 text-blue-900 bg-white border border-blue-700 rounded text-sm shadow focus:outline-none focus:border-blue-900"
+        />
+        
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="mt-3 relative">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="max-w-full h-48 object-cover rounded border border-gray-700"
+            />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="px-4 py-2 text-white rounded bg-red-600 rounded hover:bg-red-600 transition-colors disabled:opacity-50"
+            >
+              Remove Image
+            </button>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Image Upload */}
-        <div className="mb-4">
-          <label className="block text-blueGray-600 text-sm font-bold mb-2">
-            Add Image (Optional)
-          </label>
-          <input
-            id="image-input"
-            type="file"
-            accept="image/png,image/jpg,image/jpeg"
-            onChange={handleImageChange}
-            className="w-full px-3 py-2 text-blueGray-600 bg-white border border-blueGray-300 rounded text-sm shadow focus:outline-none focus:border-blue-500"
-          />
-          
-          {/* Image Preview */}
-          {imagePreview && (
-            <div className="mt-3 relative">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="max-w-full h-48 object-cover rounded border"
-              />
-              <button
-                type="button"
-                onClick={removeImage}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-              >
-                ×
-              </button>
-            </div>
-          )}
-        </div>
+      {/* Buttons */}
+      <div className="flex justify-end space-x-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={loading}
+          className="px-4 py-2 text-white rounded bg-red-600 rounded hover:bg-red-600 transition-colors disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={loading || !formData.text.trim()}
+          className="px-6 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Creating..." : "Create Post"}
+        </button>
+      </div>
+    </form>
+  </div>
+);
 
-        {/* Buttons */}
-        <div className="flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={loading}
-            className="px-4 py-2 text-blueGray-500 bg-blueGray-200 rounded hover:bg-blueGray-300 transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading || !formData.text.trim()}
-            className="px-6 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Creating..." : "Create Post"}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
 }
