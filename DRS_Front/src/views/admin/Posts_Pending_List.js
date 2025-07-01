@@ -1,15 +1,12 @@
 import React from "react";
+import CardTablePending from "components/Cards/CardTablePending.js";
 
-// components
-
-import CardTable from "components/Cards/CardTable.js";
-
-export default function Tables() {
+export default function PostsPendingList() {
   return (
     <>
       <div className="flex flex-wrap mt-4">
         <div className="w-full mb-12 px-4">
-          <CardTable color="dark" />
+          <CardTablePending adminView={true} />
         </div>
       </div>
     </>

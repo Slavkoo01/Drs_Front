@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import PostCard from "./CardPost_WO.js";
+import PendingPostCard from "./PendingPostCard.js";
 
 export default function PostsTable({ adminView = true }) {
   const [posts, setPosts] = useState([]);
@@ -15,7 +15,7 @@ export default function PostsTable({ adminView = true }) {
       
       try {
         const endpoint = adminView
-          ? `${process.env.REACT_APP_API_URL}admin/posts`
+          ? `${process.env.REACT_APP_API_URL}admin/posts/pending`
           : `${process.env.REACT_APP_API_URL}posts`;
         
         const response = await axios.get(endpoint, {
@@ -24,7 +24,7 @@ export default function PostsTable({ adminView = true }) {
           },
         });
         
-        setPosts(response.data.posts || []);
+        setPosts(response.data.pending_posts || []);
       } catch (err) {
         console.error("Error fetching posts:", err);
         setError("Failed to load posts. Please try again later.");
@@ -105,19 +105,15 @@ export default function PostsTable({ adminView = true }) {
 
   return (
     <div className="relative flex flex-col mb-6 rounded">
-      {posts.map((post) => (
-        <PostCard
-          key={post.post_id}
-          username={post.username}
-          profile_picture_url={post.profile_picture_url}
-          post_text={post.content}
-          post_image={post.image}
-          {...(adminView && {
-            onApprove: () => handleApprove(post.post_id),
-            onReject: () => handleReject(post.post_id),
-          })}
-        />
-      ))}
-    </div>
+    {posts.map((post) => (
+      <PendingPostCard
+        key={post.post_id}
+        post_text={post.content}
+        post_image={post.image}
+        onApprove={() => handleApprove(post.post_id)}
+        onReject={() => handleReject(post.post_id)}
+      />
+    ))}
+  </div>
   );
 }

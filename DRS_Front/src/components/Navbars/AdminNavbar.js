@@ -1,5 +1,4 @@
 import React from "react";
-
 import UserDropdown from "components/Dropdowns/UserDropdown.js";
 
 export default function Navbar() {
@@ -16,6 +15,7 @@ export default function Navbar() {
           >
             Admin Page
           </a>
+
           
           <ul className="flex-col md:flex-row list-none items-center hidden md:flex">
             <UserDropdown />

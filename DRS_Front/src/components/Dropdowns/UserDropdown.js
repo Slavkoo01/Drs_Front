@@ -1,8 +1,17 @@
 import React from "react";
 import { createPopper } from "@popperjs/core";
+import { useHistory } from "react-router-dom";
 
 const UserDropdown = () => {
   // dropdown props
+  const navigate = useHistory();
+  const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("DRS_user");
+
+        // Preusmeravanje na login
+        navigate.push("/");
+    }
   const [dropdownPopoverShow, setDropdownPopoverShow] = React.useState(false);
   const btnDropdownRef = React.createRef();
   const popoverDropdownRef = React.createRef();
@@ -62,14 +71,16 @@ const UserDropdown = () => {
           Another action
         </a>
         <a
+          className="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
           href="#pablo"
-          className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-          }
-          onClick={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.preventDefault();
+            handleLogout();
+        }}
         >
-          Something else here
+            Logout
         </a>
+
         <div className="h-0 my-2 border border-solid border-blueGray-100" />
         <a
           href="#pablo"

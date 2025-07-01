@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PostCard from "./CardPost_WO.js";
 
-export default function PostsTable({ adminView = true }) {
+// mode = "admin" | "feed"
+// admin => koristi /admin/posts
+// feed => koristi /posts
+export default function PostsTable({ mode = "admin" }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,18 +15,19 @@ export default function PostsTable({ adminView = true }) {
       const token = localStorage.getItem("DRS_user_token");
       setLoading(true);
       setError(null);
-      
+
       try {
-        const endpoint = adminView
-          ? `${process.env.REACT_APP_API_URL}admin/posts`
-          : `${process.env.REACT_APP_API_URL}posts`;
-        
+        const endpoint =
+          mode === "admin"
+            ? `${process.env.REACT_APP_API_URL}admin/posts`
+            : `${process.env.REACT_APP_API_URL}posts`;
+
         const response = await axios.get(endpoint, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        
+
         setPosts(response.data.posts || []);
       } catch (err) {
         console.error("Error fetching posts:", err);
@@ -34,7 +38,7 @@ export default function PostsTable({ adminView = true }) {
     };
 
     fetchPosts();
-  }, [adminView]);
+  }, [mode]);
 
   const handleApprove = async (post_id) => {
     const token = localStorage.getItem("DRS_user_token");
@@ -83,8 +87,8 @@ export default function PostsTable({ adminView = true }) {
     return (
       <div className="text-center p-8">
         <div className="text-red-500 mb-2">{error}</div>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="text-blue-500 hover:text-blue-700 underline"
         >
           Try again
@@ -97,7 +101,9 @@ export default function PostsTable({ adminView = true }) {
     return (
       <div className="text-center p-8">
         <div className="text-blueGray-500 text-lg">
-          {adminView ? "No pending posts to review" : "No posts available"}
+          {mode === "admin"
+            ? "No pending posts to review"
+            : "No posts available"}
         </div>
       </div>
     );
@@ -110,9 +116,9 @@ export default function PostsTable({ adminView = true }) {
           key={post.post_id}
           username={post.username}
           profile_picture_url={post.profile_picture_url}
-          post_text={post.content}
+          post_text={mode === "admin" ? post.content : post.text}
           post_image={post.image}
-          {...(adminView && {
+          {...(mode === "admin" && {
             onApprove: () => handleApprove(post.post_id),
             onReject: () => handleReject(post.post_id),
           })}
