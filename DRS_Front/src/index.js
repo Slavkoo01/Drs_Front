@@ -9,7 +9,9 @@ import Admin from "layouts/Admin.js";
 import Auth from "layouts/Auth.js";
 import Index from "views/Index.js";
 import UserFeed from "views/user/Feed.js";
+import Friends from "views/user/Friends.js";
 import ProtectedRoute from "./ProtectedRoute.js"; 
+import Requests from "views/user/Requests.js";
 
 ReactDOM.render(
   <BrowserRouter>
@@ -19,6 +21,19 @@ ReactDOM.render(
         path="/admin"
         component={Admin}
         allowedRoles={["admin"]}
+      />
+
+      <ProtectedRoute
+        exact
+        path="/friends"
+        component={Friends}
+        allowedRoles={["user"]}
+      />
+
+      <ProtectedRoute
+        path="/friends/requests"
+        component={Requests}
+        allowedRoles={["user"]}
       />
 
       {/* Public auth routes */}

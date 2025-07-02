@@ -16,8 +16,12 @@ export default function Navbar() {
             Home
           </Link>
 
-
-
+          <Link
+            to="/friends/requests"
+            className="text-red text-lg uppercase hidden lg:inline-block font-semibold"
+          >
+            Requests
+          </Link>
           
           <ul className="flex-col md:flex-row list-none items-center hidden md:flex">
             <UserrDropdown />

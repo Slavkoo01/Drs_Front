@@ -17,6 +17,12 @@ export default function Navbar() {
           </Link>
 
 
+          <Link
+            to="/friends"
+            className="text-red text-lg uppercase hidden lg:inline-block font-semibold"
+          >
+            Friends
+          </Link>
 
           
           <ul className="flex-col md:flex-row list-none items-center hidden md:flex">

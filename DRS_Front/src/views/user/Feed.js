@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import IndexNavbar from "components/Navbars/IndexNavbar.js";
+import UserNavbar from "components/Navbars/UserNavbar.js";
 import Footer from "components/Footers/Footer.js";
 import PostsTable from "components/Cards/PostsTable";
 import CreatePostForm from "components/Forms/CreatePostForm"; // importuj formu
@@ -17,7 +17,7 @@ export default function Feed() {
 
   return (
     <>
-      <IndexNavbar fixed />
+      <UserNavbar fixed />
       <section className="pt-24 px-4 min-h-screen bg-blueGray-50">
         <div className="container mx-auto">
           <div className="flex justify-between items-center mb-6">
