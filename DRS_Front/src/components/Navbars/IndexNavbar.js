@@ -1,5 +1,4 @@
 import React from "react";
-import UserrDropdown from "components/Dropdowns/UserrDropdown.js";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
@@ -20,7 +19,6 @@ export default function Navbar() {
 
           
           <ul className="flex-col md:flex-row list-none items-center hidden md:flex">
-            <UserrDropdown />
           </ul>
         </div>
       </nav>

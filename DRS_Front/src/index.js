@@ -7,6 +7,8 @@ import "assets/styles/tailwind.css";
 
 import Admin from "layouts/Admin.js";
 import Auth from "layouts/Auth.js";
+import UserProfile from "views/user/UserProfile.js";
+import EditProfile from "views/user/EditProfile.js";
 import Index from "views/Index.js";
 import UserFeed from "views/user/Feed.js";
 import Friends from "views/user/Friends.js";
@@ -34,6 +36,18 @@ ReactDOM.render(
         path="/friends/requests"
         component={Requests}
         allowedRoles={["user"]}
+      />
+
+      <ProtectedRoute
+        path="/users/:id/edit"
+        component={EditProfile}
+        allowedRoles={["user", "admin"]}
+      />
+
+      <ProtectedRoute
+        path="/users/:id"
+        component={UserProfile}
+        allowedRoles={["user", "admin"]}
       />
 
       {/* Public auth routes */}
