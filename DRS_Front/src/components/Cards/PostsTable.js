@@ -1,129 +1,149 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import PostCard from "./CardPost_WO.js";
+import PropTypes from "prop-types";
+import {jwtDecode} from "jwt-decode";
+import PostCard from "./CardPost_WO.js";   // prikaz pojedinačne objave
 
-// mode = "admin" | "feed"
-// admin => koristi /admin/posts
-// feed => koristi /posts
 export default function PostsTable({ mode = "admin" }) {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [posts, setPosts]   = useState([]);
+  const [loading, setLoad]  = useState(true);
+  const [error,  setError]  = useState(null);
 
+  // ID ulogovanog korisnika (potreban da znamo ko je vlasnik)
+  const token = localStorage.getItem("DRS_user_token");
+  const currentUserId = token ? jwtDecode(token).id : null;
+
+  // ─────────────────────  FETCH  ─────────────────────
   useEffect(() => {
     const fetchPosts = async () => {
-      const token = localStorage.getItem("DRS_user_token");
-      setLoading(true);
-      setError(null);
-
+      setLoad(true); setError(null);
       try {
         const endpoint =
           mode === "admin"
             ? `${process.env.REACT_APP_API_URL}admin/posts`
             : `${process.env.REACT_APP_API_URL}posts`;
 
-        const response = await axios.get(endpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await axios.get(endpoint, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        setPosts(response.data.posts || []);
+        setPosts(res.data.posts || []);
       } catch (err) {
-        console.error("Error fetching posts:", err);
-        setError("Failed to load posts. Please try again later.");
+        console.error(err);
+        setError("Failed to load posts. Please try again.");
       } finally {
-        setLoading(false);
+        setLoad(false);
       }
     };
-
     fetchPosts();
-  }, [mode]);
+  }, [mode, token]);
 
-  const handleApprove = async (post_id) => {
-    const token = localStorage.getItem("DRS_user_token");
+  // ─────────  ADMIN approve / reject  ─────────
+  const handleApprove = async (pid) => {
     try {
       await axios.post(
-        `${process.env.REACT_APP_API_URL}admin/posts/${post_id}/approve`,
+        `${process.env.REACT_APP_API_URL}admin/posts/${pid}/approve`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setPosts((prev) => prev.filter((p) => p.post_id !== post_id));
+      setPosts(prev => prev.filter(p => p.post_id !== pid));
     } catch (err) {
-      console.error("Error approving post:", err);
-      setError("Failed to approve post. Please try again.");
+      setError("Failed to approve post.");
     }
   };
 
-  const handleReject = async (post_id) => {
-    const token = localStorage.getItem("DRS_user_token");
+  const handleReject = async (pid) => {
     try {
       await axios.post(
-        `${process.env.REACT_APP_API_URL}admin/posts/${post_id}/reject`,
+        `${process.env.REACT_APP_API_URL}admin/posts/${pid}/reject`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setPosts((prev) => prev.filter((p) => p.post_id !== post_id));
+      setPosts(prev => prev.filter(p => p.post_id !== pid));
     } catch (err) {
-      console.error("Error rejecting post:", err);
-      setError("Failed to reject post. Please try again.");
+      setError("Failed to reject post.");
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blueGray-700"></div>
-        <span className="ml-2 text-blueGray-600">Loading posts...</span>
-      </div>
-    );
-  }
+  // ─────────  DELETE (vlasnik u feed‑u)  ─────────
+  const handleDelete = async (pid) => {
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}posts/${pid}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPosts(prev => prev.filter(p => p.post_id !== pid));
+    } catch (err) {
+      setError("Failed to delete post.");
+      console.error(err);
+    }
+  };
 
-  if (error) {
-    return (
-      <div className="text-center p-8">
-        <div className="text-red-500 mb-2">{error}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="text-blue-500 hover:text-blue-700 underline"
-        >
-          Try again
-        </button>
-      </div>
-    );
-  }
+  // ─────────  UPDATE (vlasnik u feed-u)  ─────────
+  const handleUpdate = async (pid, currentText, currentImage) => {
+  /*  najjednostavnije: prompt() za tekst i sliku   */
+  const newText  = prompt("Edit text:", currentText);
+  if (newText === null) return;          // Cancel
 
-  if (posts.length === 0) {
-    return (
-      <div className="text-center p-8">
-        <div className="text-blueGray-500 text-lg">
-          {mode === "admin"
-            ? "No pending posts to review"
-            : "No posts available"}
-        </div>
-      </div>
+  const newImage = prompt("Edit image URL (leave empty to keep):", currentImage || "");
+  if (newImage === null) return;         // Cancel
+
+  try {
+    await axios.put(
+      `${process.env.REACT_APP_API_URL}posts/${pid}`,
+      { text: newText.trim(), image: newImage.trim() || undefined },
+      { headers: { Authorization: `Bearer ${token}` } }
     );
+
+    // lokalno ažuriraj state
+    setPosts(prev =>
+      prev.map(p =>
+        p.post_id === pid ? { ...p, text: newText, image: newImage } : p
+      )
+    );
+  } catch (err) {
+    setError("Failed to update post.");
+    console.error(err);
   }
+};
+
+  // ──────────────────  UI  ──────────────────
+  if (loading) return (<p className="p-4">Loading posts…</p>);
+  if (error)   return (<p className="p-4 text-red-500">{error}</p>);
+  if (!posts.length)
+    return (
+      <p className="p-4 text-blueGray-500">
+        {mode === "admin" ? "No pending posts" : "No posts"}
+      </p>
+    );
 
   return (
     <div className="relative flex flex-col mb-6 rounded">
-      {posts.map((post) => (
-        <PostCard
-          key={post.post_id}
-          username={post.username}
-          profile_picture_url={post.profile_picture_url}
-          post_text={mode === "admin" ? post.content : post.text}
-          post_image={post.image}
-          {...(mode === "admin" && {
-            onApprove: () => handleApprove(post.post_id),
-            onReject: () => handleReject(post.post_id),
-          })}
-        />
-      ))}
+      {posts.map(post => {
+        const isOwner = post.user_id === currentUserId; // backend mora slati user_id
+        return (
+          <PostCard
+            key={post.post_id}
+            username={post.username}
+            profile_picture_url={post.profile_picture_url}
+            post_text={mode === "admin" ? post.content : post.text}
+            post_image={post.image}
+            {...(mode === "admin" && {
+              onApprove: () => handleApprove(post.post_id),
+              onReject : () => handleReject(post.post_id),
+            })}
+            {...(mode !== "admin" && isOwner && {
+              onDelete : () => handleDelete(post.post_id),
+              onEdit   : () => handleUpdate(
+                      post.post_id,
+                      post.text,
+                      post.image
+                    ),
+            })}
+          />
+        );
+      })}
     </div>
   );
 }
+
+PostsTable.propTypes = { mode: PropTypes.oneOf(["admin", "feed"]) };
