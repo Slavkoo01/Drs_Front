@@ -18,7 +18,7 @@ export default function Index() {
               </h2>
               <p className="mt-4 text-lg leading-relaxed text-blueGray-500">
                 Connect, share, and interact with your friends in a secure and admin-curated network.{" "}
-                Project created by Slavko Ljubojević, Aleksandar Milićev, Branislava, Mirjana
+                Project created by Slavko Ljubojević, Aleksa Milićev, Branislava, Mirjana
                 for DRS subject 
               </p>
               <div className="mt-12">
