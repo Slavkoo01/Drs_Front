@@ -3,46 +3,52 @@ import axios from "axios";
 import PropTypes from "prop-types";
 import { jwtDecode } from "jwt-decode";
 
-export default function CardTable({ color }) {
+export default function FriendSuggestions({ color }) {
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
+  // Učitavanje ID korisnika iz tokena jednom na startu
   useEffect(() => {
     const token = localStorage.getItem("DRS_user_token");
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setCurrentUserId(decoded.id); // ili decoded.user_id ili kako ti već stoji u tokenu
+        setCurrentUserId(decoded.id); // ili decoded.user_id, proveri kako je u tvom tokenu
       } catch {
         setCurrentUserId(null);
       }
     }
   }, []);
 
+  // Fetch korisnika kad se menja searchTerm ili currentUserId
   useEffect(() => {
     const fetchUsers = async () => {
-      try {
-        const token = localStorage.getItem("DRS_user_token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}friends/suggestions`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        // filtriraj da ne prikazuješ sebe
-        const filteredUsers = response.data.users.filter(user => user.id !== currentUserId);
-        setUsers(filteredUsers);
-      } catch (err) {
-        console.error("Failed to fetch users", err);
+  try {
+    const token = localStorage.getItem("DRS_user_token");
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}search/users`,  // ruta iz backend primera
+      { q: searchTerm.trim() }, // šalješ telo sa JSON podacima
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
       }
-    };
+    );
+
+    // filtriraj da ne prikazuješ sebe
+    const filteredUsers = response.data.data.users.filter(user => user.id !== currentUserId);
+    setUsers(filteredUsers);
+  } catch (err) {
+    console.error("Failed to fetch users", err);
+  }
+};
 
     if (currentUserId !== null) {
       fetchUsers();
     }
-  }, [currentUserId]);
+  }, [searchTerm, currentUserId]);
 
   const addFriend = async (userId) => {
     try {
@@ -78,11 +84,34 @@ export default function CardTable({ color }) {
                 (color === "light" ? "text-blueGray-700" : "text-white")
               }
             >
-              Users
+              Suggested Friends
             </h3>
           </div>
         </div>
       </div>
+
+      {/* Search bar */}
+      <div className="px-4 py-2">
+        <input
+  type="text"
+  placeholder="Search users..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      // Po Enteru možeš pokrenuti fetch ili nešto drugo
+      // U tvom slučaju nije potrebno jer fetch se radi pri svakoj promeni searchTerm
+      // Ali možeš ovde da dodaš npr. reset paginacije, fokus ili bilo šta drugo
+      e.preventDefault();
+    }
+  }}
+  className={
+    "w-full p-2 border rounded " + 
+    (color === "dark" ? "text-black bg-white" : "text-black")
+  }
+/>
+      </div>
+
       <div className="block w-full overflow-x-auto">
         <table className="items-center w-full bg-transparent border-collapse">
           <thead>
@@ -95,7 +124,7 @@ export default function CardTable({ color }) {
           </thead>
           <tbody>
             {users
-              .filter((user) => !user.blokiran) // filtriraj blokirane
+              .filter(user => !user.blokiran) // ne prikazuj blokirane
               .map((user) => (
                 <tr key={user.id}>
                   <td className="px-6 py-4">
@@ -127,10 +156,10 @@ export default function CardTable({ color }) {
   );
 }
 
-CardTable.defaultProps = {
+FriendSuggestions.defaultProps = {
   color: "light",
 };
 
-CardTable.propTypes = {
+FriendSuggestions.propTypes = {
   color: PropTypes.oneOf(["light", "dark"]),
 };
