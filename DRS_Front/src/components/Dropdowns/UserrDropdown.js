@@ -1,33 +1,77 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createPopper } from "@popperjs/core";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const UserDropdown = () => {
-  // dropdown props
   const navigate = useHistory();
-  const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("DRS_user");
+  const [dropdownPopoverShow, setDropdownPopoverShow] = useState(false);
+  const btnDropdownRef = useRef(null);
+  const popoverDropdownRef = useRef(null);
 
-        // Preusmeravanje na login
-        navigate.push("/");
+  // State za korisničke podatke (barem sliku i id)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Učitaj korisnički ID iz tokena ili localStorage (preporučljivo)
+  const storedUser = JSON.parse(localStorage.getItem("DRS_user") || "{}");
+  const userId = storedUser?.sub || null;
+
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
     }
-  const [dropdownPopoverShow, setDropdownPopoverShow] = React.useState(false);
-  const btnDropdownRef = React.createRef();
-  const popoverDropdownRef = React.createRef();
+
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("DRS_user_token");
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}users/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUser(response.data);
+      } catch (err) {
+        console.error("Failed to load user for dropdown:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [userId]);
+
   const openDropdownPopover = () => {
     createPopper(btnDropdownRef.current, popoverDropdownRef.current, {
       placement: "bottom-start",
     });
     setDropdownPopoverShow(true);
   };
+
   const closeDropdownPopover = () => {
     setDropdownPopoverShow(false);
   };
 
-  const user = JSON.parse(localStorage.getItem("DRS_user")); // { id: 63, ... }
-  const userId = user?.sub || ""; // fallback
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("DRS_user");
+    localStorage.removeItem("DRS_user_token");
+    navigate.push("/");
+  };
+
+  if (loading) {
+    return (
+      <div className="text-blueGray-500 block" ref={btnDropdownRef}>
+        <div className="w-12 h-12 bg-gray-300 rounded-full animate-pulse" />
+      </div>
+    );
+  }
+
+  const profilePictureUrl =
+    user?.account?.profile_picture_url ||
+    require("assets/img/default.jpg");
 
   return (
     <>
@@ -43,13 +87,14 @@ const UserDropdown = () => {
         <div className="items-center flex">
           <span className="w-12 h-12 text-sm text-white bg-blueGray-200 inline-flex items-center justify-center rounded-full">
             <img
-              alt="..."
+              alt="User avatar"
               className="w-full rounded-full align-middle border-none shadow-lg"
-              src={require("assets/img/default.jpg")}
+              src={profilePictureUrl}
             />
           </span>
         </div>
       </a>
+
       <div
         ref={popoverDropdownRef}
         className={
@@ -75,9 +120,9 @@ const UserDropdown = () => {
           onClick={(e) => {
             e.preventDefault();
             handleLogout();
-        }}
+          }}
         >
-            Logout
+          Logout
         </a>
 
         <div className="h-0 my-2 border border-solid border-blueGray-100" />

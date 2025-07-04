@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+
 
 export default function CardFriends({ color }) {
   const [friends, setFriends] = useState([]);
@@ -97,6 +99,12 @@ export default function CardFriends({ color }) {
                     >
                       Remove
                     </button>
+                    <Link
+                      to={`/friends/${friend.username || friend.korisnicko_ime}/posts`}
+                      className="bg-blue-500 text-white text-lg px-3 py-1 rounded hover:bg-blue-600 ml-2"
+                    >
+                      View Posts
+                    </Link>
                   </td>
                 </tr>
               ))
@@ -115,6 +123,8 @@ CardFriends.defaultProps = {
 
 CardFriends.propTypes = {
   color: PropTypes.oneOf(["light", "dark"]),
+  username: PropTypes.string,
+  korisnicko_ime : PropTypes.string,
   friends: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,

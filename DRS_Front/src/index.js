@@ -9,6 +9,7 @@ import Admin from "layouts/Admin.js";
 import Auth from "layouts/Auth.js";
 import UserProfile from "views/user/UserProfile.js";
 import EditProfile from "views/user/EditProfile.js";
+import FriendPosts from "views/user/FriendPosts.js";
 import Index from "views/Index.js";
 import UserFeed from "views/user/Feed.js";
 import Friends from "views/user/Friends.js";
@@ -48,6 +49,12 @@ ReactDOM.render(
         path="/users/:id"
         component={UserProfile}
         allowedRoles={["user", "admin"]}
+      />
+
+      <ProtectedRoute
+        path="/friends/:username/posts" 
+        component={FriendPosts}
+        allowedRoles={"user"}
       />
 
       {/* Public auth routes */}
