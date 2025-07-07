@@ -5,16 +5,12 @@ import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "assets/styles/tailwind.css";
 
+import ProtectedRoute from "./ProtectedRoute.js"; 
+
+import Index from "views/Index.js";
 import Admin from "layouts/Admin.js";
 import Auth from "layouts/Auth.js";
-import UserProfile from "views/user/UserProfile.js";
-import EditProfile from "views/user/EditProfile.js";
-import FriendPosts from "views/user/FriendPosts.js";
-import Index from "views/Index.js";
-import UserFeed from "views/user/Feed.js";
-import Friends from "views/user/Friends.js";
-import ProtectedRoute from "./ProtectedRoute.js"; 
-import Requests from "views/user/Requests.js";
+import User from "layouts/User.js";
 
 ReactDOM.render(
   <BrowserRouter>
@@ -27,34 +23,9 @@ ReactDOM.render(
       />
 
       <ProtectedRoute
-        exact
-        path="/friends"
-        component={Friends}
+        path="/user"
+        component={User}
         allowedRoles={["user"]}
-      />
-
-      <ProtectedRoute
-        path="/friends/requests"
-        component={Requests}
-        allowedRoles={["user"]}
-      />
-
-      <ProtectedRoute
-        path="/users/:id/edit"
-        component={EditProfile}
-        allowedRoles={["user", "admin"]}
-      />
-
-      <ProtectedRoute
-        path="/users/:id"
-        component={UserProfile}
-        allowedRoles={["user", "admin"]}
-      />
-
-      <ProtectedRoute
-        path="/friends/:username/posts" 
-        component={FriendPosts}
-        allowedRoles={"user"}
       />
 
       {/* Public auth routes */}
@@ -69,7 +40,7 @@ ReactDOM.render(
 
           if (!user) return <Index />;
           if (user.role === "admin") return <Redirect to="/admin/dashboard" />;
-          return <UserFeed />;
+          return <User />;
         }}
       />
 

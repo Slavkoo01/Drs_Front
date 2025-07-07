@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
-
+import { useHistory } from "react-router-dom";
 
 export default function CardFriends({ color }) {
   const [friends, setFriends] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -23,14 +23,14 @@ export default function CardFriends({ color }) {
     fetchFriends();
   }, []);
 
-  const removeFriend = async (userId) => {
+  const removeFriend = async (userId, e) => {
+    e.stopPropagation();
     try {
       const token = localStorage.getItem("DRS_user_token");
       await axios.delete(`${process.env.REACT_APP_API_URL}friends/${userId}/remove`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Ukloni prijatelja iz liste nakon uspešnog brisanja
-      setFriends((prevFriends) => prevFriends.filter((friend) => friend.id !== userId));
+      setFriends((prev) => prev.filter((f) => f.id !== userId));
     } catch (err) {
       console.error("Failed to remove friend", err);
     }
@@ -38,73 +38,65 @@ export default function CardFriends({ color }) {
 
   return (
     <div
-      className={
-        "relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded " +
-        (color === "light" ? "bg-emerald-500" : "bg-lightBlue-900 text-white")
-      }
+      className={`relative flex flex-col min-w-0 break-words w-full mt-4 mb-6 shadow-lg rounded ${
+        color === "light" ? "bg-white" : "bg-lightBlue-900 text-white"
+      }`}
     >
-      <div className="rounded-t mb-0 px-4 py-3 border-0">
-        <div className="flex flex-wrap items-center">
-          <div className="relative w-full px-4 max-w-full flex-grow flex-1">
-            <h3
-              className={
-                "font-semibold text-lg " +
-                (color === "light" ? "text-blueGray-700" : "text-white")
-              }
-            >
-              Your Friends
-            </h3>
-          </div>
-        </div>
+      <div className="rounded-t px-4 py-3 border-b border-gray-200">
+        <h3 className={`font-semibold text-lg ${color === "light" ? "text-gray-800" : "text-white"}`}>
+          Your Friends
+        </h3>
       </div>
-      <div className="block w-full overflow-x-auto p-4">
-        <table className="items-center w-full bg-transparent border-collapse">
+
+      <div className="p-4 overflow-x-auto">
+        <table className="w-full table-auto text-left">
           <thead>
-            <tr>
-              <th className="px-6 py-3 text-xs font-semibold text-left">Profile</th>
-              <th className="px-6 py-3 text-xs font-semibold text-left">First Name</th>
-              <th className="px-6 py-3 text-xs font-semibold text-left">Last Name</th>
-              <th className="px-6 py-3 text-xs font-semibold text-left">Actions</th>
+            <tr className="bg-gray-100 text-sm text-gray-700">
+              <th className="px-4 py-2">Profile</th>
+              <th className="px-4 py-2">Username</th>
+              <th className="px-4 py-2">First Name</th>
+              <th className="px-4 py-2">Last Name</th>
+              <th className="px-4 py-2">Email</th>
+              <th className="px-4 py-2">Remove friend</th>
             </tr>
           </thead>
           <tbody>
             {friends.length === 0 ? (
               <tr>
-                <td
-                  colSpan={4}
-                  className={"text-" + (color === "light" ? "gray-500" : "gray-300") + " text-center py-4"}
-                >
-                  You have no friends yet ...
+                <td colSpan={6} className="text-center text-gray-400 py-6">
+                  You have no friends yet...
                 </td>
               </tr>
             ) : (
               friends.map((friend) => (
-                <tr key={friend.id}>
-                  <td className="px-6 py-4">
+                <tr
+                  key={friend.id}
+
+                  
+                >
+                  <td className="px-4 py-3">
                     <img
+                    onClick={() => history.push(`/user/profile/${friend.id}`)}
                       src={
                         friend.profile_picture_url ||
                         "https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
                       }
-                      className="h-12 w-12 rounded-full border object-cover"
                       alt={`${friend.first_name} ${friend.last_name}`}
+                      className="h-10 w-10 cursor-pointer rounded-full border object-cover"
                     />
                   </td>
-                  <td className="px-6 py-4">{friend.first_name}</td>
-                  <td className="px-6 py-4">{friend.last_name}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3 cursor-pointer" onClick={() => history.push(`/user/profile/${friend.id}`)}>@{friend.username}</td>
+                  <td className="px-4 py-3">{friend.first_name}</td>
+                  <td className="px-4 py-3">{friend.last_name}</td>
+                  <td className="px-4 py-3">{friend.email}</td>
+                  <td className="px-4 py-3">
                     <button
-                      onClick={() => removeFriend(friend.id)}
-                      className="bg-red-500 text-white text-sm px-3 py-1 rounded hover:bg-red-600"
+                      style={{paddingLeft: 45}}
+                      onClick={(e) => removeFriend(friend.id, e)}
+                      className="text-red-500 border-none focus:outline-none"
                     >
-                      Remove
+                      <i className="fas fa-trash " />
                     </button>
-                    <Link
-                      to={`/friends/${friend.username || friend.korisnicko_ime}/posts`}
-                      className="bg-blue-500 text-white text-lg px-3 py-1 rounded hover:bg-blue-600 ml-2"
-                    >
-                      View Posts
-                    </Link>
                   </td>
                 </tr>
               ))
@@ -123,11 +115,11 @@ CardFriends.defaultProps = {
 
 CardFriends.propTypes = {
   color: PropTypes.oneOf(["light", "dark"]),
-  username: PropTypes.string,
-  korisnicko_ime : PropTypes.string,
   friends: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
+      username: PropTypes.string,
+      email: PropTypes.string,
       first_name: PropTypes.string,
       last_name: PropTypes.string,
       profile_picture_url: PropTypes.string,

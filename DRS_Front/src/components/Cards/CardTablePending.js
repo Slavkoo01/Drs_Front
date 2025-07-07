@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import PendingPostCard from "./PendingPostCard.js";
+import CardPost from "./CardPost.js";
 
 export default function PostsTable({ adminView = true }) {
   const [posts, setPosts] = useState([]);
@@ -23,7 +23,7 @@ export default function PostsTable({ adminView = true }) {
             Authorization: `Bearer ${token}`,
           },
         });
-        
+        console.log("Res: ", response.data)
         setPosts(response.data.pending_posts || []);
       } catch (err) {
         console.error("Error fetching posts:", err);
@@ -37,6 +37,7 @@ export default function PostsTable({ adminView = true }) {
   }, [adminView]);
 
   const handleApprove = async (post_id) => {
+    console.log("LOL: ", post_id)
     const token = localStorage.getItem("DRS_user_token");
     try {
       await axios.post(
@@ -106,13 +107,16 @@ export default function PostsTable({ adminView = true }) {
   return (
     <div className="relative flex flex-col mb-6 rounded">
     {posts.map((post) => (
-      <PendingPostCard
-        key={post.post_id}
+      <CardPost
+        id = {post.post_id}
+        username={post.username}
         post_text={post.content}
+        profile_picture_url={post.profile_picture_url}
         post_image={post.image}
-        onApprove={() => handleApprove(post.post_id)}
+          onApprove={() => handleApprove(post.post_id)}
         onReject={() => handleReject(post.post_id)}
       />
+
     ))}
   </div>
   );

@@ -1,5 +1,5 @@
 import React from "react";
-import UserrDropdown from "components/Dropdowns/UserrDropdown.js";
+import UserrDropdown from "components/Dropdowns/UserDropdown.js";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {

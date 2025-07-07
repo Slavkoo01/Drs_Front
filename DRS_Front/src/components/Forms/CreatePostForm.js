@@ -1,204 +1,234 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { FaRegImage } from "react-icons/fa";
 
-export default function CreatePostForm({ onPostCreated, onCancel }) {
-  const [formData, setFormData] = useState({
-    text: "",
-    image: null
-  });
+export default function CreatePostBox({ onPostCreated }) {
+  /* ─────────── user / state ─────────── */
+  const user = JSON.parse(localStorage.getItem("DRS_user") || "{}");
+  const displayName = user?.username || "Friend";
+
+  const [expanded, setExpanded] = useState(false);
+  const [showImageField, setShowImageField] = useState(false);
+
+  const [form, setForm] = useState({ text: "", imageUrl: "" });
+  const [preview, setPreview] = useState(null);
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
+  const [msg, setMsg] = useState({ type: "", text: "" });
 
-  const handleTextChange = (e) => {
-    setFormData({ ...formData, text: e.target.value });
-    setError(""); // Clear error when user starts typing
+  /* ─────────── helpers ─────────── */
+  const reset = () => {
+    setForm({ text: "", imageUrl: "" });
+    setPreview(null);
+    setExpanded(false);
+    setShowImageField(false);
+    setMsg({ type: "", text: "" });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
-      if (!allowedTypes.includes(file.type)) {
-        setError("Please select a valid image file (PNG, JPG, JPEG)");
-        return;
-      }
-
-      // Validate file size (example: max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError("Image file must be less than 5MB");
-        return;
-      }
-
-      setFormData({ ...formData, image: file });
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target.result);
-      reader.readAsDataURL(file);
-      setError("");
-    }
-  };
-
-  const removeImage = () => {
-    setFormData({ ...formData, image: null });
-    setImagePreview(null);
-    // Reset file input
-    document.getElementById('image-input').value = '';
-  };
-
-  const handleSubmit = async (e) => {
+  const validateAndSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validation
-    if (!formData.text.trim()) {
-      setError("Post text cannot be empty");
-      return;
-    }
-
-    if (formData.text.length > 500) {
-      setError("Post text exceeds maximum length of 500 characters");
+    if (!form.text.trim() && !form.imageUrl) {
+      setMsg({
+        type: "error",
+        text: "Please write something or add an image."
+      });
       return;
     }
 
     setLoading(true);
-    setError("");
-    setSuccess("");
-
     try {
       const token = localStorage.getItem("DRS_user_token");
-      
-      // Create FormData for multipart/form-data
-      const submitData = new FormData();
-      submitData.append('text', formData.text);
-      if (formData.image) {
-        submitData.append('image', formData.image);
-      }
-
-      const response = await axios.post(
+      await axios.post(
         `${process.env.REACT_APP_API_URL}posts/create`,
-        submitData,
         {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        }
+          text: form.text.trim() || null,
+          image_url: form.imageUrl || null
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setSuccess("Post created successfully! It will be visible after admin approval.");
-      
-      // Reset form
-      setFormData({ text: "", image: null });
-      setImagePreview(null);
-      document.getElementById('image-input').value = '';
-      
-      // Call parent callback after a short delay to show success message
+      setMsg({ type: "success", text: "Post submitted for approval." });
       setTimeout(() => {
-        onPostCreated();
-      }, 2000);
-
+        onPostCreated?.();
+        reset();
+      }, 1200);
     } catch (err) {
-      console.error("Error creating post:", err);
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else {
-        setError("Failed to create post. Please try again.");
-      }
+      setMsg({
+        type: "error",
+        text: err.response?.data?.error || "Could not create post."
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  /* ─────────── UI ─────────── */
   return (
-  <div className="bg-white rounded-lg shadow-lg p-6">
-    <h3 className="text-xl font-bold text-blue-900 mb-4">Tell us..</h3>
-    
-    {error && (
-      <div className="bg-red-600 border border-red-800 text-white px-4 py-3 rounded mb-4 font-semibold">
-        {error}
-      </div>
-    )}
-    
-    {success && (
-      <div className="bg-green-600 border border-green-800 text-white px-4 py-3 rounded mb-4 font-semibold">
-        {success}
-      </div>
-    )}
-
-    <form onSubmit={handleSubmit}>
-      {/* Text Input */}
-      <div className="mb-4">
-        <label className="block text-blue-900 text-m font-bold mb-2">
-          What's on your mind?
-        </label>
-        <textarea
-          value={formData.text}
-          onChange={handleTextChange}
-          placeholder="Share your thoughts..."
-          className="w-full px-3 py-2 text-blue-900 bg-white border border-blue-700 rounded text-sm shadow focus:outline-none focus:border-blue-900 resize-none"
-          rows="4"
-          maxLength="500"
+    <div className="bg-white rounded-xl shadow p-4 space-y-3">
+      {/* ---------- top row ---------- */}
+      <div className=" flex space-x-3">
+        {/* Avatar fixed top-left */}
+        <img
+          src={
+            user?.profile_picture_url ||
+            "https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
+          }
+          alt="avatar"
+          className="w-10 h-10  rounded-full object-cover"
         />
-        <div className="text-right text-xs text-blue-700 mt-1">
-          {formData.text.length}/500 characters
-        </div>
-      </div>
 
-      {/* Image Upload */}
-      <div className="mb-4">
-        <label className="block text-blue-900 text-l font-bold mb-2">
-          Add Image (Optional)
-        </label>
-        <input
-          id="image-input"
-          type="file"
-          accept="image/png,image/jpg,image/jpeg"
-          onChange={handleImageChange}
-          className="w-full px-3 py-2 text-blue-900 bg-white border border-blue-700 rounded text-sm shadow focus:outline-none focus:border-blue-900"
-        />
-        
-        {/* Image Preview */}
-        {imagePreview && (
-          <div className="mt-3 relative">
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="max-w-full h-48 object-cover rounded border border-gray-700"
+        {/* Pill OR expanded form */}
+        {!expanded ? (
+          <button
+            onClick={() => setExpanded(true)}
+            className="flex text-left bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-4 rounded-full"
+          >
+            What&apos;s on your mind, {displayName}?
+          </button>
+        ) : (
+          <form onSubmit={validateAndSubmit} className="flex-1  space-y-3">
+            {/* Textarea */}
+            <textarea
+              value={form.text}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, text: e.target.value }))
+              }
+              rows="3"
+              placeholder={`What's on your mind, ${displayName}?`}
+              className="w-full resize-none outline-none"
             />
-            <button
-              type="button"
-              onClick={removeImage}
-              className="px-4 py-2 text-white rounded bg-red-600 rounded hover:bg-red-600 transition-colors disabled:opacity-50"
-            >
-              Remove Image
-            </button>
-          </div>
+
+            {/* Image‑URL input appears only if toggled */}
+            {showImageField && (
+              <input
+                type="text"
+                value={form.imageUrl}
+                onChange={(e) => {
+                  const url = e.target.value.trim();
+                  setForm((f) => ({ ...f, imageUrl: url }));
+                  if (
+                    url &&
+                    !/^https?:\/\/.+\.(jpg|jpeg|png)$/i.test(url)
+                  ) {
+                    setMsg({
+                      type: "error",
+                      text: "Image URL must end with .jpg, .jpeg or .png"
+                    });
+                    setPreview(null);
+                  } else {
+                    setMsg({ type: "", text: "" });
+                    setPreview(url || null);
+                  }
+                }}
+                placeholder="Image URL (optional)"
+                className="w-full border rounded p-2 text-sm"
+              />
+            )}
+
+            {/* Preview */}
+            {preview && (
+              <div className="flex justify-center items-center">
+
+                <img
+                  src={preview}
+                  alt="preview"
+                  className=" mt-2 max-h-48 rounded border object-cover"
+                />
+              </div>
+            )}
+
+            {/* Alerts */}
+            {msg.text && (
+              <div
+                className={`${msg.type === "error" ? "text-red-600" : "text-emerald-600"
+                  } text-sm`}
+              >
+                {msg.text}
+              </div>
+            )}
+
+            {/* Form actions */}
+            <div className="mt-3 flex justify-between">
+              <div>
+                  {!showImageField && (
+                <div className=" font-semibold text-gray-600 pt-2">
+
+                    <Action
+                    label="Photo"
+                    icon={<FaRegImage className="mr-2 text-green-600" />}
+                    onClick={() => {
+                      setExpanded(true);
+                      setShowImageField(true);
+                    }}
+                    />
+                </div>
+                ) || (
+                <div className=" font-semibold text-gray-600 pt-2">
+                    <Action
+                    label="Cancel Photo"
+                    icon={<FaRegImage className="mr-2" />}
+                    onClick={() => {
+                      setExpanded(true);
+                      setShowImageField(false)
+                      setPreview(null);
+                      setForm((f) => ({ ...f, imageUrl: "" }));
+                    }}
+                    />
+                </div>
+                )}
+
+              </div>
+                  
+              <div className="flex justify-end space-x-3">
+
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="px-4 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-1 text-sm rounded bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-50"
+                >
+                  {loading ? "Posting…" : "Post"}
+                </button>
+              </div>
+            </div>
+          </form>
         )}
       </div>
 
-      {/* Buttons */}
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={loading}
-          className="px-4 py-2 text-white rounded bg-red-600 rounded hover:bg-red-600 transition-colors disabled:opacity-50"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={loading || !formData.text.trim()}
-          className="px-6 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Creating..." : "Create Post"}
-        </button>
-      </div>
-    </form>
-  </div>
-);
+      {/* ---------- divider ---------- */}
+      {!expanded && <hr />}
 
+      {/* ---------- bottom actions (collapsed only) ---------- */}
+      {!expanded && (
+        <div className="flex justify-between font-semibold text-gray-600 pt-2">
+          <Action
+            label="Photo"
+            icon={<FaRegImage className="mr-2 text-green-600" />}
+            onClick={() => {
+              setExpanded(true);
+              setShowImageField(true);
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
+
+/* Bottom action button */
+const Action = ({ icon, label, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded-md flex-1 justify-center"
+  >
+    {icon}
+    <span>{label}</span>
+  </button>
+);

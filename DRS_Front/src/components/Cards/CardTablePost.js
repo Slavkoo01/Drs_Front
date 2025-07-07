@@ -8,22 +8,24 @@ export default function PostsTable({ adminView = true }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    
     const fetchPosts = async () => {
       const token = localStorage.getItem("DRS_user_token");
       setLoading(true);
       setError(null);
-      
+
       try {
         const endpoint = adminView
           ? `${process.env.REACT_APP_API_URL}admin/posts`
           : `${process.env.REACT_APP_API_URL}posts`;
-        
+
         const response = await axios.get(endpoint, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        
+
+        console.log("POSTOVI: ", response);
         setPosts(response.data.posts || []);
       } catch (err) {
         console.error("Error fetching posts:", err);
@@ -83,8 +85,8 @@ export default function PostsTable({ adminView = true }) {
     return (
       <div className="text-center p-8">
         <div className="text-red-500 mb-2">{error}</div>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="text-blue-500 hover:text-blue-700 underline"
         >
           Try again

@@ -1,188 +1,183 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useHistory } from "react-router-dom";
 import axios from "axios";
-import UserNavbar from "components/Navbars/UserNavbar.js";
 
-export default function EditProfile() {
-  const { id }     = useParams();
-  const history    = useHistory();
-
-  /* ---------------- state ---------------- */
+export default function EditProfileForm({ isOpen, onClose, userData }) {
   const [form, setForm] = useState({
-    first_name: "", last_name: "",
+    first_name: "",
+    last_name: "",
     address: { street: "", city: "", country: "" },
-    contact : { email : "", phone : "" },
-    profile_picture_url: ""         // stari URL
+    contact: { email: "", phone: "" },
+    profile_picture_url: "",
   });
 
-  const [pictureFile,    setPictureFile   ] = useState(null);
-  const [picturePreview, setPicturePreview] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving , setSaving ] = useState(false);
-  const [error  , setError  ] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState({ type: "", text: "" });
 
-  /* --------- fetch trenutnog profila --------- */
+  // Disable scroll when modal is open
   useEffect(() => {
-    (async () => {
-      try {
-        const token = localStorage.getItem("DRS_user_token");
-        if (!token) { setError("No authentication token"); return; }
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}users/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
-        setForm({
-          first_name: data.first_name || "",
-          last_name : data.last_name  || "",
-          address   : {
-            street : data.address?.street  || "",
-            city   : data.address?.city    || "",
-            country: data.address?.country || ""
-          },
-          contact   : {
-            email: data.contact?.email || "",
-            phone: data.contact?.phone || ""
-          },
-          profile_picture_url: data.account?.profile_picture_url || ""
-        });
+  // Set initial form state from userData
+  useEffect(() => {
+    if (userData) {
+      setForm({
+        first_name: userData.first_name || "",
+        last_name: userData.last_name || "",
+        address: {
+          street: userData.address?.street || "",
+          city: userData.address?.city || "",
+          country: userData.address?.country || "",
+        },
+        contact: {
+          email: userData.contact?.email || "",
+          phone: userData.contact?.phone || "",
+        },
+        profile_picture_url: userData.account?.profile_picture_url || "",
+      });
+      setImagePreview(userData.account?.profile_picture_url || "");
+    }
+  }, [userData]);
 
-        setPicturePreview(data.account?.profile_picture_url || null);
-      } catch (err) {
-        setError(err.response?.data?.error || "Failed to load profile");
-      } finally { setLoading(false); }
-    })();
-  }, [id]);
-
-  /* -------------- helpers -------------- */
   const handleChange = (path) => (e) => {
     const val = e.target.value;
-    setForm(prev => {
+    setForm((prev) => {
       const copy = { ...prev };
       const keys = path.split(".");
       let ref = copy;
-      keys.slice(0, -1).forEach(k => (ref[k] = { ...ref[k] }));
+      keys.slice(0, -1).forEach((k) => (ref[k] = { ...ref[k] }));
       ref[keys.at(-1)] = val;
       return copy;
     });
   };
 
-  const handlePicture = (e) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setPictureFile(f);
-    setPicturePreview(URL.createObjectURL(f));
+  const handleImageUrlChange = (e) => {
+    const url = e.target.value;
+    setForm((prev) => ({ ...prev, profile_picture_url: url }));
+    setImagePreview(url);
   };
 
-  /* -------------- submit -------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true); setError(null);
+    setSaving(true);
+    setMsg({ type: "", text: "" });
 
     try {
       const token = localStorage.getItem("DRS_user_token");
-      if (!token) { setError("No authentication token"); return; }
+      if (!token) {
+        setMsg({ type: "error", text: "Missing authentication token" });
+        return;
+      }
 
-      const fd = new FormData();
-      fd.append("data", JSON.stringify(form));
-      if (pictureFile) fd.append("profile_picture", pictureFile);
-
-      const res = await axios.put(
-        `${process.env.REACT_APP_API_URL}users/${id}`,
-        fd,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}users/${userData.id}`,
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      /*  ⬇︎ UPDATE localStorage -> da dropdown dobije novi avatar  */
       const stored = JSON.parse(localStorage.getItem("DRS_user") || "{}");
       stored.profile_picture_url =
-        res.data.profile_picture_url || form.profile_picture_url;
+        response.data.profile_picture_url || form.profile_picture_url;
       localStorage.setItem("DRS_user", JSON.stringify(stored));
 
-      history.push(`/users/${id}`);
+      setMsg({ type: "success", text: "Profile updated successfully!" });
+
+      setTimeout(() => {
+        setMsg({ type: "", text: "" });
+        onClose(); // close modal after success
+      }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || "Save failed");
-    } finally { setSaving(false); }
+      setMsg({ type: "error", text: err.response?.data?.error || "Save failed" });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  /* -------------- UI stanja -------------- */
-  if (loading) return <FullScreenCenter>Loading…</FullScreenCenter>;
-  if (error)   return <FullScreenCenter><span className="text-red-600">{error}</span></FullScreenCenter>;
+  if (!isOpen || !userData) return null;
 
-  /* -------------- render -------------- */
   return (
-    <>
-      <UserNavbar />
-      <div className="min-h-[calc(100vh-64px)] flex justify-center items-center p-5">
-        <form onSubmit={handleSubmit}
-              className="space-y-4 w-full max-w-md bg-white shadow rounded p-6">
+    <div className="mt-6 fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+      <div className="bg-white rounded-lg p-4 max-w-sm sm:max-w-xs">
+        <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
 
-          <h2 className="text-2xl font-bold text-center">Edit Profile</h2>
+        {msg.text && (
+          <div
+            className={`mb-3 p-2 rounded text-sm font-medium ${
+              msg.type === "success" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+            }`}
+          >
+            {msg.text}
+          </div>
+        )}
 
-          {/*  preview + upload  */}
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div className="text-center">
             <img
               src={
-                picturePreview ||
-                form.profile_picture_url ||
+                imagePreview ||
                 "https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
               }
               alt="avatar preview"
-              className="mx-auto mb-2 w-28 h-28 rounded-full object-cover ring-2 ring-emerald-500"
+              className="mx-auto mb-2 w-24 h-24 rounded-full object-cover ring-2 ring-emerald-500"
             />
             <input
-              type="file"
-              accept="image/*"
-              onChange={handlePicture}
-              className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
-                         file:rounded file:border-0 file:text-sm file:bg-emerald-50
-                         file:text-emerald-700 hover:file:bg-emerald-100"
+              type="text"
+              value={form.profile_picture_url}
+              onChange={handleImageUrlChange}
+              placeholder="Image URL"
+              className=" px-3 py-2 border rounded text-sm"
             />
           </div>
 
-          {/* Ime / prezime */}
-          <Input value={form.first_name} onChange={handleChange("first_name")} placeholder="First name" required />
-          <Input value={form.last_name } onChange={handleChange("last_name" )} placeholder="Last name"  required />
+          <Input value={form.first_name} onChange={handleChange("first_name")} placeholder="First Name" required />
+          <Input value={form.last_name} onChange={handleChange("last_name")} placeholder="Last Name" required />
+          <Input type="email" value={form.contact.email} onChange={handleChange("contact.email")} placeholder="Email" required />
+          <Input value={form.contact.phone} onChange={handleChange("contact.phone")} placeholder="Phone" />
+          <Input value={form.address.street} onChange={handleChange("address.street")} placeholder="Street" />
+          <Input value={form.address.city} onChange={handleChange("address.city")} placeholder="City" />
+          <Input value={form.address.country} onChange={handleChange("address.country")} placeholder="Country" />
 
-          {/* Kontakt */}
-          <Input type="email" value={form.contact.email}
-                 onChange={handleChange("contact.email")}
-                 placeholder="Email" required />
-          <Input value={form.contact.phone}
-                 onChange={handleChange("contact.phone")}
-                 placeholder="Phone" />
-
-          {/* Adresa */}
-          <Input value={form.address.street}
-                 onChange={handleChange("address.street")}
-                 placeholder="Street" />
-          <Input value={form.address.city}
-                 onChange={handleChange("address.city")}
-                 placeholder="City" />
-          <Input value={form.address.country}
-                 onChange={handleChange("address.country")}
-                 placeholder="Country" />
-
-          <button type="submit"
-                  disabled={saving}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded disabled:opacity-50">
-            {saving ? "Saving…" : "Save Changes"}
-          </button>
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-4 py-2 rounded bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+          </div>
         </form>
       </div>
-    </>
+    </div>
   );
 }
 
-/* ---------- pomoćne komponente ---------- */
-
+// Reusable input
 const Input = ({ type = "text", ...props }) => (
-  <input type={type}
-         className="border rounded w-full p-2"
-         {...props} />
-);
-
-const FullScreenCenter = ({ children }) => (
-  <div className="min-h-screen flex justify-center items-center">{children}</div>
+  <input
+    type={type}
+    className="border rounded  px-3 py-2 text-sm text-gray-700"
+    {...props}
+  />
 );

@@ -1,31 +1,42 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
-import {jwtDecode} from "jwt-decode";
-import PostCard from "./CardPost_WO.js";   // prikaz pojedinačne objave
+import PostCard from "./CardPost_WO.js";   
+import { jwtDecode } from "jwt-decode";
 
-export default function PostsTable({ mode = "admin" }) {
+export default function PostsTable({ mode = "admin", func, username}) {
   const [posts, setPosts]   = useState([]);
   const [loading, setLoad]  = useState(true);
   const [error,  setError]  = useState(null);
+  
 
   // ID ulogovanog korisnika (potreban da znamo ko je vlasnik)
   const token = localStorage.getItem("DRS_user_token");
-  const currentUserId = token ? jwtDecode(token).id : null;
+  const currentUserId = jwtDecode(token).sub
 
   // ─────────────────────  FETCH  ─────────────────────
   useEffect(() => {
     const fetchPosts = async () => {
       setLoad(true); setError(null);
+      
       try {
-        const endpoint =
-          mode === "admin"
-            ? `${process.env.REACT_APP_API_URL}admin/posts`
-            : `${process.env.REACT_APP_API_URL}posts`;
+
+         let endpoint = "";
+
+        if (mode === "admin") {
+          endpoint = `${process.env.REACT_APP_API_URL}admin/posts`;
+        } else if (username) {
+          endpoint = `${process.env.REACT_APP_API_URL}posts/${username}`;
+        } else {
+          endpoint = `${process.env.REACT_APP_API_URL}posts/friends`;
+        }
 
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
+        console.log("res",username, res)
+
         setPosts(res.data.posts || []);
       } catch (err) {
         console.error(err);
@@ -72,6 +83,9 @@ export default function PostsTable({ mode = "admin" }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPosts(prev => prev.filter(p => p.post_id !== pid));
+      if(func){
+        func();
+      }
     } catch (err) {
       setError("Failed to delete post.");
       console.error(err);
@@ -79,25 +93,32 @@ export default function PostsTable({ mode = "admin" }) {
   };
 
   // ─────────  UPDATE (vlasnik u feed-u)  ─────────
-  const handleUpdate = async (pid, currentText, currentImage) => {
-  /*  najjednostavnije: prompt() za tekst i sliku   */
-  const newText  = prompt("Edit text:", currentText);
-  if (newText === null) return;          // Cancel
-
-  const newImage = prompt("Edit image URL (leave empty to keep):", currentImage || "");
-  if (newImage === null) return;         // Cancel
-
+ const handleUpdate = async (pid, Text, Image) => {
   try {
+    const trimmedText = (Text || "").trim();
+    const trimmedImage = (Image || "").trim();
+
+     if (!Text && !Image) {
+     await handleDelete(pid);
+      return;
+  }
+
     await axios.put(
       `${process.env.REACT_APP_API_URL}posts/${pid}`,
-      { text: newText.trim(), image: newImage.trim() || undefined },
-      { headers: { Authorization: `Bearer ${token}` } }
+      {
+        text: trimmedText,
+        image: trimmedImage || undefined,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
     );
 
-    // lokalno ažuriraj state
-    setPosts(prev =>
-      prev.map(p =>
-        p.post_id === pid ? { ...p, text: newText, image: newImage } : p
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.post_id === pid
+          ? { ...p, post_text: trimmedText, post_image: trimmedImage }
+          : p
       )
     );
   } catch (err) {
@@ -105,6 +126,7 @@ export default function PostsTable({ mode = "admin" }) {
     console.error(err);
   }
 };
+
 
   // ──────────────────  UI  ──────────────────
   if (loading) return (<p className="p-4">Loading posts…</p>);
@@ -119,25 +141,25 @@ export default function PostsTable({ mode = "admin" }) {
   return (
     <div className="relative flex flex-col mb-6 rounded">
       {posts.map(post => {
-        const isOwner = post.user_id === currentUserId; // backend mora slati user_id
+        const isOwner = String(post.user_id) === String(currentUserId);
         return (
           <PostCard
             key={post.post_id}
+            post_id={post.post_id}
+            user_id = {post.user_id}
             username={post.username}
             profile_picture_url={post.profile_picture_url}
-            post_text={mode === "admin" ? post.content : post.text}
-            post_image={post.image}
+            post_text={mode === "admin" ? post.content : post.post_text}
+            post_image={post.post_image}
             {...(mode === "admin" && {
               onApprove: () => handleApprove(post.post_id),
               onReject : () => handleReject(post.post_id),
             })}
-            {...(mode !== "admin" && isOwner && {
+            {...(isOwner && {
               onDelete : () => handleDelete(post.post_id),
-              onEdit   : () => handleUpdate(
-                      post.post_id,
-                      post.text,
-                      post.image
-                    ),
+              onEdit   : (pid,Text,Image) => handleUpdate(pid,Text,Image),
+
+                   
             })}
           />
         );

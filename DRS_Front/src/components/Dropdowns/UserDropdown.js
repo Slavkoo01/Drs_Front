@@ -43,6 +43,25 @@ const UserDropdown = () => {
     fetchUser();
   }, [userId]);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        popoverDropdownRef.current &&
+        !popoverDropdownRef.current.contains(event.target) &&
+        btnDropdownRef.current &&
+        !btnDropdownRef.current.contains(event.target)
+      ) {
+        closeDropdownPopover();
+      }
+    }
+
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const openDropdownPopover = () => {
     createPopper(btnDropdownRef.current, popoverDropdownRef.current, {
       placement: "bottom-start",
@@ -102,20 +121,15 @@ const UserDropdown = () => {
           "bg-white text-base z-50 float-left py-2 list-none text-left rounded shadow-lg min-w-48"
         }
       >
-        <Link
-          to={`/users/${userId}`}
+        <Link to={`/user/profile/${userId}`}
           className="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
+          onClick={() => closeDropdownPopover()}
         >
           View Profile
         </Link>
-        <Link
-          to={`/users/${userId}/edit`}
-          className="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-        >
-          Edit Profile
-        </Link>
+        <hr></hr>
         <a
-          className="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
+          className="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent font-semibold text-red-500"
           href="#pablo"
           onClick={(e) => {
             e.preventDefault();
@@ -125,16 +139,6 @@ const UserDropdown = () => {
           Logout
         </a>
 
-        <div className="h-0 my-2 border border-solid border-blueGray-100" />
-        <a
-          href="#pablo"
-          className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-          }
-          onClick={(e) => e.preventDefault()}
-        >
-          Seprated link
-        </a>
       </div>
     </>
   );

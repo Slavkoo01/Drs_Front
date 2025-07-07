@@ -1,4 +1,4 @@
-/*eslint-disable*/
+
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -56,7 +56,7 @@ export default function Sidebar() {
                     className="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent"
                     onClick={() => setCollapseShow("hidden")}
                   >
-                    <i className="fas fa-times"></i>
+                    <i className="fas fa-times"></i>d
                   </button>
                 </div>
               </div>
@@ -75,197 +75,75 @@ export default function Sidebar() {
             {/* Divider */}
             <hr className="my-4 md:min-w-full" />
             {/* Heading */}
-            <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              Dashboard
-            </h6>
+            
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
               <li className="items-center">
                 <Link
                   className={
                     "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/dashboard") !== -1
+                    (window.location.href.indexOf("/user/feed") !== -1
                       ? "text-lightBlue-500 hover:text-lightBlue-600"
                       : "text-blueGray-700 hover:text-blueGray-500")
                   }
-                  to="/admin/dashboard"
-                >
-                  <i
-                    className={
-                      "fas fa-tv mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/dashboard") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  Dashboard
-                </Link>
-              </li>
-            </ul>
-            {/* Navigation */}
-            <hr className="my-4 md:min-w-full" />
-           
-            <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              User Management
-            </h6>
-
-            <ul className="md:flex-col md:min-w-full flex flex-col list-none">
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/create-user") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/create-user"
-                >
-                  <i
-                    className={
-                      "fas fa-user mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/create-user") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  Add new user
-                </Link>
-              </li>   
-
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/users") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/users"
-                >
-                  <i
-                    className={
-                      "fas fa-table mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/users") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  Users list
-                </Link>
-              </li>
-
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/pending-users") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/pending-users"
-                >
-                  <i
-                    className={
-                      "fas fa-clock mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/pending-users") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  Pending users list
-                </Link>
-              </li>    
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/blocked-users") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/blocked-users"
-                >
-                  <i
-                    className={
-                      "fas fa-times mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/blocked-users") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  blocked users list
-                </Link>
-              </li>         
-            </ul>
-
-            {/* Divider */}
-            <hr className="my-4 md:min-w-full" />
-            {/* Heading */}
-            <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              Post Management
-            </h6>
-            {/* Navigation */}
-
-             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/posts") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/posts"
+                  to="/user/feed"
                 >
                   <i
                     className={
                       "fas fa-file mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/posts") !== -1
+                      (window.location.href.indexOf("/user/feed") !== -1
                         ? "opacity-75"
                         : "text-blueGray-300")
                     }
                   ></i>{" "}
-                  Posts list
+                  Feed
                 </Link>
-              </li>   
-
-                    <li className="items-center">
-
-              </li>  
-
-               <li className="items-center">
+              </li>
+            </ul>
+            <ul className="md:flex-col md:min-w-full flex flex-col list-none">
+              <li className="items-center">
                 <Link
                   className={
                     "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/pending-posts") !== -1
+                    (window.location.href.indexOf("/user/friends") !== -1
                       ? "text-lightBlue-500 hover:text-lightBlue-600"
                       : "text-blueGray-700 hover:text-blueGray-500")
                   }
-                  to="/admin/pending-posts"
+                  to="/user/friends"
+                >
+                  <i
+                    className={
+                      "fas fa-user mr-2 text-sm " +
+                      (window.location.href.indexOf("/user/friends") !== -1
+                        ? "opacity-75"
+                        : "text-blueGray-300")
+                    }
+                  ></i>{" "}
+                  Friends
+                </Link>
+              </li>   
+
+              <li className="items-center">
+                <Link
+                  className={
+                    "text-xs uppercase py-3 font-bold block " +
+                    (window.location.href.indexOf("/user/friends_requests") !== -1
+                      ? "text-lightBlue-500 hover:text-lightBlue-600"
+                      : "text-blueGray-700 hover:text-blueGray-500")
+                  }
+                  to="/user/friends_requests"
                 >
                   <i
                     className={
                       "fas fa-clock mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/pending-posts") !== -1
+                      (window.location.href.indexOf("/user/friends_requests") !== -1
                         ? "opacity-75"
                         : "text-blueGray-300")
                     }
                   ></i>{" "}
-                  Pending Post list
+                  Friends Requests
                 </Link>
-              </li> 
-
-              
-              <li className="items-center">
-
-              </li>     
+              </li>        
             </ul>
-
-            
-
-            
-
-            
-           
           </div>
         </div>
       </nav>

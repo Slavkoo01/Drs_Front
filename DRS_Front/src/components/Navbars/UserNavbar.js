@@ -1,6 +1,8 @@
 import React from "react";
-import UserrDropdown from "components/Dropdowns/UserrDropdown.js";
 import { Link } from "react-router-dom";
+
+import UserDropdown from "components/Dropdowns/UserDropdown.js";
+import FriendSearch from "../Search/FriendSearch.js";
 
 export default function Navbar() {
   return (
@@ -17,16 +19,11 @@ export default function Navbar() {
           </Link>
 
 
-          <Link
-            to="/friends"
-            className="text-red text-lg uppercase hidden lg:inline-block font-semibold"
-          >
-            Friends
-          </Link>
+             <FriendSearch/>
 
           
           <ul className="flex-col md:flex-row list-none items-center hidden md:flex">
-            <UserrDropdown />
+            <UserDropdown />
           </ul>
         </div>
       </nav>

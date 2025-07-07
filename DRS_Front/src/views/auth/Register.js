@@ -103,12 +103,17 @@ export default function Register() {
                   <div className="text-center mt-6">
                     <button
                       type="submit"
-                      className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none w-full ease-linear transition-all duration-150"
+                      className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase  py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none w-full ease-linear transition-all duration-150"
                     >
                       Create Account
                     </button>
                   </div>
                 </form>
+                <div className=" mt-3 flex justify-center items-center">
+                  <a href="/auth/login">
+                    Already have an account? Login!
+                  </a>
+                </div>
               </div>
             </div>
           </div>

@@ -6,6 +6,7 @@ export default function CardTable({ color }) {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
+
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("DRS_user_token");
