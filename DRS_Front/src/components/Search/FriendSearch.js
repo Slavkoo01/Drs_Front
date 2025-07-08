@@ -39,6 +39,7 @@ export default function FriendSearch({ color = "light" }) {
             },
           }
         );
+        console.log("logs: ", res.data)
         if (!cancelled) {
           const list = res.data.users.filter(
             (u) => u.id !== myId && !u.blocked
@@ -146,7 +147,7 @@ export default function FriendSearch({ color = "light" }) {
                 </div>
                 <div className="text-xs text-gray-500">@{u.username}</div>
                 {u.friendship_status === "Accepted" && (
-                  <div className="text-xs text-green-600 mt-1">Friends</div>
+                  <div className="text-xs text-emerald-500 mt-1">Friends</div>
                 )}
               </div>
             </div>
