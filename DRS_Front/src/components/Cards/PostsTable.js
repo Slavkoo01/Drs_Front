@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import PostCard from "./CardPost_WO.js";   
 import { jwtDecode } from "jwt-decode";
 
+
 export default function PostsTable({ mode = "admin", func, username}) {
   const [posts, setPosts]   = useState([]);
   const [loading, setLoad]  = useState(true);
@@ -15,13 +16,12 @@ export default function PostsTable({ mode = "admin", func, username}) {
   const currentUserId = jwtDecode(token).sub
 
   // ─────────────────────  FETCH  ─────────────────────
-  useEffect(() => {
+    useEffect(() => {
     const fetchPosts = async () => {
-      setLoad(true); setError(null);
-      
+      setLoad(true);
+      setError(null);
       try {
-
-         let endpoint = "";
+        let endpoint = "";
 
         if (mode === "admin") {
           endpoint = `${process.env.REACT_APP_API_URL}admin/posts`;
@@ -34,8 +34,6 @@ export default function PostsTable({ mode = "admin", func, username}) {
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        
-        console.log("res",username, res)
 
         setPosts(res.data.posts || []);
       } catch (err) {
@@ -45,8 +43,16 @@ export default function PostsTable({ mode = "admin", func, username}) {
         setLoad(false);
       }
     };
+
     fetchPosts();
-  }, [mode, token]);
+
+    
+
+    return () => {
+
+    };
+  }, [mode, token, username]);
+
 
   // ─────────  ADMIN approve / reject  ─────────
   const handleApprove = async (pid) => {

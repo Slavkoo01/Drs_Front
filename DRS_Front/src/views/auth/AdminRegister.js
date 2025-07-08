@@ -53,6 +53,8 @@ export default function Register() {
       );
       setSuccessMessage("Successfully registered! Check your email.");
       console.log(response.data);
+      window.location.reload();
+
       
     } catch (error) {
       if (error.response && error.response.data.error) {
@@ -109,7 +111,7 @@ export default function Register() {
                     </div>
                   )}
                   {successMessage && (
-                    <div className="text-green-500 text-sm mb-4 text-center">
+                    <div className="text-emerald-500 text-sm mb-4 text-center">
                       {successMessage}
                     </div>
                   )}

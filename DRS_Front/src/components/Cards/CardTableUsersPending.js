@@ -118,7 +118,7 @@ export default function CardTable({ color }) {
                 <td className="px-6 py-4 space-x-2">
                   <button
                     onClick={() => acceptUser(user.id)}
-                    className="py-2 px-4 rounded text-white text-sm bg-emerald-500 hover:bg-emerald-600"
+                    className="py-2 mr-2 px-4 rounded text-white text-sm bg-emerald-500 hover:bg-emerald-600"
                   >
                     Accept
                   </button>

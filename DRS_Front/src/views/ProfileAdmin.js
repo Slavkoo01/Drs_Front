@@ -18,6 +18,7 @@ export default function Profile() {
   const [showPosts, setShowPosts] = useState(false);
   const [postNumber, setPostNumber] = useState(0);
   const [is_receiver, setIs_Receiver] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
 
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function Profile() {
       setUserData(response.data);
       setFriendStatus(response.data.friend_status); 
       setIs_Receiver(response.data.is_receiver)
+      setIsBlocked(response.data.account.blocked)
     } catch (err) {
       setError(err.response?.data?.error || err.message);
     } finally {
@@ -94,6 +96,30 @@ const handleAddFriend = async () => {
     setBusy(false);
   }
 };
+
+const toggleBlockUser = async (id, block) => {
+    try {
+      const token = localStorage.getItem("DRS_user_token");
+      let url = "";
+      if(!isBlocked) {
+          url = `${process.env.REACT_APP_API_URL}admin/users/${id}/block`;
+         setIsBlocked(true);
+      }else{
+          url = `${process.env.REACT_APP_API_URL}admin/users/${id}/unblock`;
+         setIsBlocked(false);
+      }
+
+      await axios.post(
+        url,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+    } catch (err) {
+      console.error("Error updating user block status", err);
+    }
+  };
+
     const handleAccept = async (userId) => {
   try {
     const token = localStorage.getItem("DRS_user_token");
@@ -218,59 +244,21 @@ const handleAddFriend = async () => {
         <i className="fas fa-pen mr-2"></i>Edit
       </button>
     )}
-
-    {/* If request is Pending and you're the receiver → show Accept/Reject */}
-    {friendStatus === "Pending" && is_receiver && (
-      <>
-        <button
-          onClick={() => handleAccept(id)}
-          disabled={busy}
-          className="uppercase mr-3 font-bold shadow text-xs px-4 py-2 rounded bg-emerald-500 hover:bg-emerald-600 text-white"
-        >
-          Accept
-        </button>
-        <button
-          onClick={handleRemoveFriend}
-          disabled={busy}
-          className="uppercase font-bold shadow text-xs px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white"
-        >
-          Reject
-        </button>
-      </>
+    {friendStatus !== "self" && (
+     <button
+                    onClick={() => toggleBlockUser(id, !isBlocked)}
+                    className={
+                      "py-2 rounded text-white text-sm " +
+                      (isBlocked ? "bg-emerald-500 px-4" : "bg-red-500 px-6")
+                    }
+                  >
+                    {isBlocked ? "Unblock" : "Block"}
+                  </button>
     )}
 
-    {/* If already friends */}
-    {friendStatus === "Accepted" && (
-      <button
-        onClick={handleRemoveFriend}
-        disabled={busy}
-        className="uppercase font-bold shadow text-xs px-4 py-2 rounded bg-emerald-500 hover:bg-emerald-600 text-white"
-      >
-        Remove Friend
-      </button>
-    )}
+  
 
-    {/* If Pending and you're the sender (not receiver) */}
-    {friendStatus === "Pending" && !is_receiver && (
-      <button
-        onClick={handleRemoveFriend}
-        disabled={busy}
-        className="uppercase font-bold shadow text-xs px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600 text-white"
-      >
-        Cancel Request
-      </button>
-    )}
 
-    {/* If no relation or previously rejected */}
-    {(friendStatus === "none" || friendStatus === "Rejected") && (
-      <button
-        onClick={handleAddFriend}
-        disabled={busy}
-        className="uppercase font-bold shadow text-xs px-4 py-2 rounded bg-lightBlue-500 hover:bg-lightBlue-600 text-white"
-      >
-        Add Friend +
-      </button>
-    )}
   </div>
 </div>
 
@@ -326,7 +314,7 @@ const handleAddFriend = async () => {
                 {/* Bottom Button */}
                 <div className="mt-10 py-10 border-t border-blueGray-200 ">
                   <div className="flex flex-wrap justify-center">
-                    {!showPosts && (
+                    {!showPosts && user_type !== "admin" && (
                       <div className="w-full lg:w-9/12 px-4 text-center" >
                       <button
                         onClick={() => (setShowPosts(true))}
@@ -336,7 +324,7 @@ const handleAddFriend = async () => {
                       </button>
                     </div>)}
                       
-                    {showPosts && (
+                    {showPosts && user_type !== "admin" && (
                       
                         
                       <div className="w-full lg:w-9/12 px-4  ">

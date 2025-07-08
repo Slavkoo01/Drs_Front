@@ -21,6 +21,7 @@ import User_List from "views/admin/User_List.js";
 import User_Add_New from "views/admin/User_Add_New.js";
 import User_Pending_List from "views/admin/User_Pending_List.js";
 import User_Blocked_list from "views/admin/User_Blocked_List.js";
+import ProfileAdmin from "../views/ProfileAdmin.js";
 
 export default function Admin() {
   return (
@@ -43,6 +44,9 @@ export default function Admin() {
             <Route path="/admin/approved-posts" exact component={Posts_Approved_List} />
             <Route path="/admin/pending-posts" exact component={Posts_Pending_List} />
             <Route path="/admin/rejected-posts" exact component={Posts_Rejected_List} />
+
+            <Route path="/admin/profile/:id" exact component={ProfileAdmin} />
+
             <Redirect from="/admin" to="/admin/dashboard" />
             <Redirect from="/" to="/admin/dashboard" />
           </Switch>

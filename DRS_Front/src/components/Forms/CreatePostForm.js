@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { FaRegImage } from "react-icons/fa";
+
 
 export default function CreatePostBox({ onPostCreated }) {
   /* ─────────── user / state ─────────── */
@@ -155,7 +155,7 @@ export default function CreatePostBox({ onPostCreated }) {
 
                     <Action
                     label="Photo"
-                    icon={<FaRegImage className="mr-2 text-green-600" />}
+                    icon={<i className="fas fa-image mt-1 mr-2"/>}
                     onClick={() => {
                       setExpanded(true);
                       setShowImageField(true);
@@ -166,7 +166,7 @@ export default function CreatePostBox({ onPostCreated }) {
                 <div className=" font-semibold text-gray-600 pt-2">
                     <Action
                     label="Cancel Photo"
-                    icon={<FaRegImage className="mr-2" />}
+                    icon={<i className="fas fa-image mt-1 mr-2"/>}
                     onClick={() => {
                       setExpanded(true);
                       setShowImageField(false)
@@ -209,7 +209,7 @@ export default function CreatePostBox({ onPostCreated }) {
         <div className="flex justify-between font-semibold text-gray-600 pt-2">
           <Action
             label="Photo"
-            icon={<FaRegImage className="mr-2 text-green-600" />}
+            icon={<i className="fas fa-image mt-1 mr-2"/>}
             onClick={() => {
               setExpanded(true);
               setShowImageField(true);

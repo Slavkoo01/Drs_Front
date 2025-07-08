@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import CardPost from "./CardPost.js";
+import socket from "socket.js"
 
 export default function PostsTable({ adminView = true }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const DrsUser  = JSON.parse(localStorage.getItem("DRS_user"));
+  const role = DrsUser.role;
+
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -23,7 +27,7 @@ export default function PostsTable({ adminView = true }) {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log("Res: ", response.data)
+
         setPosts(response.data.pending_posts || []);
       } catch (err) {
         console.error("Error fetching posts:", err);
@@ -34,6 +38,20 @@ export default function PostsTable({ adminView = true }) {
     };
 
     fetchPosts();
+
+      if (role === "admin") {
+    const listener = (newPostData) => {
+      console.log("New post received:", newPostData);
+      fetchPosts();
+    };
+
+    socket.on("new_post_created", listener);
+
+    return () => {
+      socket.off("new_post_created", listener); 
+    };
+  }
+
   }, [adminView]);
 
   const handleApprove = async (post_id) => {

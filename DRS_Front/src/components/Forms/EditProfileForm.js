@@ -174,14 +174,6 @@ const handleChange = (path) => (e) => {
 
           {/* contact */}
           <input
-            type="email"
-            value={form.contact.email}
-            onChange={handleChange("contact.email")}
-            placeholder="Email"
-            required
-            className="max-w-250-px p-2 mb-3 border rounded"
-          />
-          <input
             type="text"
             value={form.contact.phone}
             onChange={handleChange("contact.phone")}

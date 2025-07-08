@@ -3,7 +3,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { createPopper } from "@popperjs/core";
 import { useHistory } from "react-router-dom";
-import { FaSearch } from "react-icons/fa"; // ← Add this if using react-icons
+
 
 export default function FriendSearch({ color = "light" }) {
   const history = useHistory();

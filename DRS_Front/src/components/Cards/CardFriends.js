@@ -14,12 +14,13 @@ export default function CardFriends({ color }) {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}friends`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setFriends(response.data.friends || []);
       } catch (err) {
         console.error("Failed to fetch friends", err);
       }
     };
-
+    
     fetchFriends();
   }, []);
 

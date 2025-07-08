@@ -15,6 +15,8 @@ export default function PostCard({
   const [editable, setEditable] = useState(false);
   const [text, setText] = useState(post_text);
   const [imageUrl, setImageUrl] = useState(post_image);
+  const DrsUser = JSON.parse(localStorage.getItem("DRS_user"));
+  const role = DrsUser.role;
 
   const handleCancel = () => {
     setText(post_text);
@@ -35,7 +37,7 @@ export default function PostCard({
       {!editable ? (
         <div>
           <div className="flex justify-between items-center mb-2">
-            <Link to={`/user/profile/${user_id}`}>
+            <Link to={role === "admin" ? `/admin/profile/${user_id}` : `/user/profile/${user_id}`}>
               <div className="flex items-center cursor-pointer">
                 <img
                   src={
@@ -54,7 +56,7 @@ export default function PostCard({
             )}
           </div>
 
-          <p className="mb-2 text-gray-700">{post_text}</p>
+          <p className="mb-2 text-gray-700 break-words whitespace-pre-wrap">{post_text}</p>
 
           {post_image && (
             <img

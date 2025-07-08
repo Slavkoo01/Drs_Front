@@ -9,8 +9,9 @@ import HeaderStats from "components/Headers/HeaderStats.js";
 
 import Feed from "views/user/Feed.js"
 import Friends from "views/user/Friends.js"
-import Friends_requests from "views/user/Friends.js"
+import Friends_requests from "views/user/Requests.js"
 import Profile from "../views/Profile.js"
+import SearchFriends from "../views/user/SearchFriends.js"
 
 import Footer from "components/Footers/Footer";
 
@@ -28,7 +29,8 @@ export default function Admin() {
             <Route path="/user/friends" exact component={Friends} />
             <Route path="/user/friends_requests" exact component={Friends_requests} />
             <Route path="/user/profile/:id" exact component={Profile} />
-           
+            <Route path="/user/search_friends" exact component={SearchFriends} />
+
             <Redirect from="/user" to="/user/feed" />
             <Redirect from="/" to="/user/feed" />
           </Switch>

@@ -17,6 +17,8 @@ const UserDropdown = () => {
   // Učitaj korisnički ID iz tokena ili localStorage (preporučljivo)
   const storedUser = JSON.parse(localStorage.getItem("DRS_user") || "{}");
   const userId = storedUser?.sub || null;
+  const role = storedUser.role;
+
 
   useEffect(() => {
     if (!userId) {
@@ -90,7 +92,7 @@ const UserDropdown = () => {
 
   const profilePictureUrl =
     user?.account?.profile_picture_url ||
-    require("assets/img/default.jpg");
+    "https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
 
   return (
     <>
@@ -121,7 +123,7 @@ const UserDropdown = () => {
           "bg-white text-base z-50 float-left py-2 list-none text-left rounded shadow-lg min-w-48"
         }
       >
-        <Link to={`/user/profile/${userId}`}
+        <Link to={role === "admin" ? `/admin/profile/${userId}` : `/user/profile/${userId}`}
           className="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
           onClick={() => closeDropdownPopover()}
         >

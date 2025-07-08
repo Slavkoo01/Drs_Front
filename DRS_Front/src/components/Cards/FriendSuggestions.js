@@ -35,9 +35,9 @@ export default function FriendSuggestions({ color }) {
             },
           }
         );
-
+        console.log(response.data)
         const filtered = response.data.users.filter(
-          (u) => u.id !== currentUserId && !u.blokiran
+          (u) => u.id !== currentUserId && !u.blokiran && u.friendship_status !== "Accepted"
         );
 
         setUsers(filtered);
@@ -157,8 +157,9 @@ export default function FriendSuggestions({ color }) {
             ) : (
               filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-3">
+                  <td className="px-6 py-3 cursor-pointer" onClick={() => history.push(`/user/profile/${user.id}`)}>
                     <img
+
                       src={
                         user.profile_picture_url ||
                         "https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
@@ -170,14 +171,14 @@ export default function FriendSuggestions({ color }) {
                   <td className="px-6 py-3 cursor-pointer" onClick={() => history.push(`/user/profile/${user.id}`)}>@{user.username}</td>
                   <td className="px-6 py-3 cursor-pointer" onClick={() => history.push(`/user/profile/${user.id}`)}>{user.first_name}</td>
                   <td className="px-6 py-3 cursor-pointer" onClick={() => history.push(`/user/profile/${user.id}`)}>{user.last_name}</td>
-                  <td className="px-6 py-3">
+                  <td className="px-6 py-3" >
                     {user.friendship_status === "Pending" ? (
                       <button
                         disabled={busyId === user.id}
                         onClick={() => removeFriendRequest(user.id)}
-                        className="bg-yellow-400 text-black text-sm px-3 py-1 rounded hover:bg-yellow-500"
+                        className="bg-yellow-500 text-black text-sm px-3 py-1 rounded hover:bg-yellow-500"
                       >
-                        {busyId === user.id ? "Cancelling..." : "Pending Request"}
+                        {busyId === user.id ? "Cancelling" : "Pending"}
                       </button>
                     ) : (
                       <button

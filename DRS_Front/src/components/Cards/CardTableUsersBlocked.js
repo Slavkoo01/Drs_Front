@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
+import { useHistory } from 'react-router-dom'
 
 export default function CardTable({ color }) {
   const [users, setUsers] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -88,15 +90,16 @@ export default function CardTable({ color }) {
               <tr key={user.id}>
                 <td className="px-6 py-4">
                   <img
-                  src={user.account?.profile_picture_url || "https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"}
-                  className="h-12 w-12 rounded-full border"
+                  src={user.profile_picture_url || "https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"}
+                  className="h-12 w-12 rounded-full border cursor-pointer"
+                  onClick={() => {history.push(`/admin/profile/${user.id}`)}}
                   alt="profile"
                 />
 
                 </td>
-                <td className="px-6 py-4">{user.ime}</td>
-                <td className="px-6 py-4">{user.prezime}</td>
-                <td className="px-6 py-4">{user.username}</td>
+                <td className="px-6 py-4 cursor-pointer" onClick={() => {history.push(`/admin/profile/${user.id}`)}}>{user.ime}</td>
+                <td className="px-6 py-4 cursor-pointer" onClick={() => {history.push(`/admin/profile/${user.id}`)}}>{user.prezime}</td>
+                <td className="px-6 py-4 cursor-pointer" onClick={() => {history.push(`/admin/profile/${user.id}`)}}>{user.username}</td>
                 <td className="px-6 py-4">{user.email}</td>
                 <td className="px-6 py-4">
                   <button
